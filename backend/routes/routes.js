@@ -1,38 +1,36 @@
 const express = require('express');
 const router = express.Router();
-const OAuth = require('oauth-1.0a');
-const { enc, HmacSHA1 } = require('crypto-js');
+const { oauth, tokens } = require('../oauth');
 const axios = require('axios').default;
 
-let tokens = {
-	key: process.env.access_token_key,
-	secret: process.env.access_token_secret
-};
-
-let hash_function = (base_string, key) => {
-	return HmacSHA1(base_string, key).toString(enc.Base64);
-}
-
-const oauth = new OAuth({
-	consumer: {
-		key: process.env.consumer_key,
-		secret: process.env.consumer_secret
-	},
-	signature_method: 'HMAC-SHA1',
-	hash_function: hash_function
-});
+function timeoutPromise(ms, promise) {
+	return new Promise((resolve, reject) => {
+	  const timeoutId = setTimeout(() => {
+		reject(new Error("promise timeout"))
+	  }, ms);
+	  promise.then(
+		(res) => {
+		  clearTimeout(timeoutId);
+		  resolve(res);
+		},
+		(err) => {
+		  clearTimeout(timeoutId);
+		  reject(err);
+		}
+	  );
+	})
+  }
 
 router.get('/', (req, res) => {
 	res.send('API Version 1');
 });
 
 let baseURL = 'https://api.twitter.com/1.1';
-
 router.post('/deleteTweets/', (req, res) => {
 	const id = req.body.data;
 	let idArr = id.split(',');
-
-	let numErrs = 0;
+	console.log(idArr.length);
+	let numSuccesses = 0;
 	for(let i = 0; i < idArr.length; i++) {
 		const requestData = {
 			url: 'https://api.twitter.com/1.1/statuses/destroy/'+idArr[i]+'.json',
@@ -40,18 +38,22 @@ router.post('/deleteTweets/', (req, res) => {
 		};
 		let authorization = oauth.toHeader(oauth.authorize(requestData, tokens));
 
-		axios({
+		timeoutPromise(5000,
+			axios({
 			baseURL: baseURL,
 			url: 'statuses/destroy/' + idArr[i] + '.json',
 			method: 'post',
 			headers: authorization
-		})
+		}))
 		.then(response => {
-			console.log(response);
+			console.log(response.statusText);
+			numSuccesses++
 		})
-		.catch(numErrs++)
-		.finally(res.send({successfulDeletions: idArr.length - numErrs, unsuccessfulDeletions: numErrs}));
+		.catch(err => {
+			console.log(err.response.statusText);
+		})
 	}
+	res.send({successfulDeletions: numSuccesses, unsuccessfulDeletions: idArr.length - numSuccesses})
 });
 
 module.exports = router;
