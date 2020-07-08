@@ -13,7 +13,7 @@ let baseURL = 'https://api.twitter.com/1.1';
 router.post('/deleteTweets/', (req, res) => {
 	const data = [];
 	const id = req.body.data;
-	let idArr = id.split(',');
+	let idArr = id.split('\n');
 
 	for(let i = 0; i < idArr.length; i++) {
 

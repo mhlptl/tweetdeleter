@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import Form from './components/Form';
+import List from './components/List';
 
 class App extends Component {
 
@@ -45,13 +47,12 @@ class App extends Component {
 	handleSubmit = (event) => {
 		event.preventDefault();
 		let ids = this.state.ids;
-		ids = ids.split('\n').join('');
-		let regex = /^([0-9]{18}[,]?)+/;
+		let regex = /^([0-9]{18}[\n]?)+/;
 		if(!ids.match(regex)) {
 			this.setState({error: 'Invalid Input'});
 			return false;
 		}
-		let numIds = ids.split(',').length;
+		let numIds = ids.split('\n').length;
 		if(numIds > 25) {
 			this.setState({error: 'Please do not input more than 25 IDs'});
 			return false;
@@ -70,31 +71,18 @@ class App extends Component {
 
 		if(data.length === 0) {
 			return (
-				<form onSubmit={this.handleSubmit}>
-					<textarea 
-					placeholder={'Tweet Ids (Separated by comma)'} 
-					value={ids} 
-					name={'ids'} 
-					onChange={this.handleChange}
-					id={'id-input'}
-					/><br/>
-					{error && <p id={'error'}>{error}</p>}
-					<input
-					type={'submit'} 
-					value={'Delete'}
-					id={'button'}
-					/>
-				</form>
+				<Form 
+				ids={ids} 
+				error={error} 
+				handleChange={this.handleChange}
+				handleSubmit={this.handleSubmit} 
+				/>
 			)
 		}
 		else {
 			return (
 				<React.Fragment>
-					<ul id={'deletion-data'}>
-						{data.map((status, index) => {
-							return <li key={index}>{status.tweetID + '\t' + status.statusText}</li>
-						})}
-					</ul>
+					<List data={data} />
 					<input type={'button'}
 					value={'Delete More'}
 					id={'button'}
