@@ -1,5 +1,14 @@
 import React from 'react';
 
+function ListItem(props) {
+
+	const { tweetID, statusText } = props;
+
+	return (
+		<li>{tweetID + ': ' + statusText}</li>
+	);
+}
+
 function List(props) {
 
 	const { data } = props;
@@ -7,7 +16,7 @@ function List(props) {
 	return (
 		<ul id={'deletion-data'}>
 			{data.map((status, index) => {
-				return <li key={index}>{status.tweetID + '\t' + status.statusText}</li>
+				return <ListItem key={index} tweetID={status.tweetID} statusText={status.statusText} />
 			})}
 		</ul>
 	)
