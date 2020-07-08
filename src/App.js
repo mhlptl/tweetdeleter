@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
-import Form from './components/Form';
-import List from './components/List';
+import Display from './components/Display';
 
 class App extends Component {
 
@@ -69,28 +68,16 @@ class App extends Component {
 
 		const { ids, error, data } = this.state;
 
-		if(data.length === 0) {
-			return (
-				<Form 
-				ids={ids} 
-				error={error} 
-				handleChange={this.handleChange}
-				handleSubmit={this.handleSubmit} 
-				/>
-			)
-		}
-		else {
-			return (
-				<React.Fragment>
-					<List data={data} />
-					<input type={'button'}
-					value={'Delete More'}
-					id={'button'}
-					onClick={this.deleteMore}
-					/>
-				</React.Fragment>
-			)
-		}
+		return (
+			<Display 
+			ids={ids} 
+			error={error} 
+			data={data} 
+			handleChange={this.handleChange} 
+			handleSubmit={this.handleSubmit}
+			deleteMore={this.deleteMore}
+			/>
+		)
 	}
 }
 
